@@ -61,4 +61,9 @@ No external libraries are used.
 ---
 
 ## 📁 Project Structure
+/project-folder
+│
+├── index.html # Main HTML file
+├── style.css # Canvas and page styling
+└── script.js # Rocket logic, particles, and animation
 
