@@ -9,35 +9,165 @@ let rocket = {
     y: canvas.height / 2,
     width: 30,
     height: 60,
-    speed: 5
+    speed: 5,
+    angle: 0
 };
+
+let bullets = [];
+let score = 0;
+
+class Bullet {
+    constructor(x, y, angle) {
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.speed = 10;
+        this.radius = 3;
+        // Direction vector based on rocket rotation (UP is 0)
+        this.vx = Math.sin(angle) * this.speed;
+        this.vy = -Math.cos(angle) * this.speed;
+        this.life = 100; // Frames before it disappears
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life--;
+    }
+
+    draw() {
+        ctx.save();
+        ctx.fillStyle = '#f1c40f'; // Yellow glowing bullet
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#f1c40f';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
 
 let particles = [];
 
+class Alien {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 15 + 10;
+        this.speedX = (Math.random() - 0.5) * 2;
+        this.speedY = (Math.random() - 0.5) * 2;
+        this.bobAngle = Math.random() * Math.PI * 2;
+        this.bobSpeed = Math.random() * 0.05 + 0.02;
+    }
+
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.bobAngle += this.bobSpeed;
+
+        const hRadius = this.size * 1.5;
+        const vRadius = this.size * 0.5 + 5; // Added 5 for bobbing amplitude
+
+        if (this.x - hRadius < 0 || this.x + hRadius > canvas.width) {
+            this.speedX *= -1;
+        }
+        if (this.y - vRadius < 0 || this.y + vRadius > canvas.height) {
+            this.speedY *= -1;
+        }
+    }
+
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y + Math.sin(this.bobAngle) * 5);
+
+        // UFO body
+        ctx.fillStyle = '#9b59b6';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, this.size * 1.5, this.size * 0.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // UFO dome
+        ctx.fillStyle = 'rgba(116, 235, 213, 0.7)';
+        ctx.beginPath();
+        ctx.arc(0, -this.size * 0.3, this.size * 0.7, Math.PI, 0);
+        ctx.fill();
+
+        // Alien head
+        ctx.fillStyle = '#2ecc71';
+        ctx.beginPath();
+        ctx.arc(0, -this.size * 0.3, this.size * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Alien eyes
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(-this.size * 0.15, -this.size * 0.4, this.size * 0.1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(this.size * 0.15, -this.size * 0.4, this.size * 0.1, 0, Math.PI * 2);
+        ctx.fill();
+
+        // UFO lights
+        const timeOffset = Date.now() / 200;
+        ctx.fillStyle = (Math.floor(timeOffset + this.x) % 2 === 0) ? '#f1c40f' : '#e74c3c';
+        ctx.beginPath();
+        ctx.arc(-this.size * 0.8, 0, this.size * 0.15, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = (Math.floor(timeOffset + this.x + 1) % 2 === 0) ? '#f1c40f' : '#e74c3c';
+        ctx.beginPath();
+        ctx.arc(this.size * 0.8, 0, this.size * 0.15, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 15 + 10;
+        // Random speed between 0.5 and 4.5 in any direction
+        const baseSpeed = Math.random() * 4 + 0.5;
+        const angle = Math.random() * Math.PI * 2;
+        this.speedX = Math.cos(angle) * baseSpeed;
+        this.speedY = Math.sin(angle) * baseSpeed;
+    }
+}
+
+const aliens = [];
+for (let i = 0; i < 7; i++) {
+    aliens.push(new Alien());
+}
+
 class Particle {
-    constructor(x, y) {
+    constructor(x, y, color = 'rgba(255, 255, 255, 1)', speedMult = 1) {
         this.x = x;
         this.y = y;
-        this.size = Math.random() * 5 + 2; // Random size 2-7
-        this.speedX = Math.random() * 2 - 1; // Random horizontal spread
-        this.speedY = Math.random() * 2 + 1; // Falls/moves down slightly
-        this.color = 'rgba(255, 255, 255, 1)'; // White
+        this.size = Math.random() * 5 + 2;
+        this.speedX = (Math.random() * 2 - 1) * speedMult;
+        this.speedY = (Math.random() * 2 - 1) * speedMult;
+        this.color = color;
         this.opacity = 1;
     }
 
     update() {
         this.x += this.speedX;
-        this.y += this.speedY; // Smoke tends to drift away relative to rocket
-        this.size += 0.1; // Grow slightly
-        if (this.size > 20) this.size = 20; // Cap size
-        this.opacity -= 0.02; // Fade out
+        this.y += this.speedY;
+        this.size *= 0.95; // Shrink
+        this.opacity -= 0.02;
     }
 
     draw() {
-        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+        ctx.fillStyle = this.color.replace('1)', `${this.opacity})`);
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
+    }
+}
+
+function createExplosion(x, y, color) {
+    for (let i = 0; i < 20; i++) {
+        particles.push(new Particle(x, y, color, 5));
     }
 }
 
@@ -63,6 +193,9 @@ function draw() {
     ctx.shadowColor = moonColor;
     ctx.fill();
     ctx.shadowBlur = 0; // Reset shadow
+
+    // Draw Aliens
+    aliens.forEach(a => a.draw());
 
     // Draw Particles first (behind rocket)
     particles.forEach(p => p.draw());
@@ -109,7 +242,51 @@ function draw() {
     ctx.lineWidth = 4;
     ctx.stroke();
 
+    // --- DRAW ASTRONAUT ---
+    ctx.save();
+    // Move up to sit on top of the rocket body
+    ctx.translate(0, -10);
+
+    // Spacesuit body
+    ctx.fillStyle = '#ecf0f1';
+    ctx.beginPath();
+    ctx.roundRect(-8, -10, 16, 18, 5);
+    ctx.fill();
+
+    // Helmet
+    ctx.beginPath();
+    ctx.arc(0, -15, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#bdc3c7';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Visor
+    ctx.fillStyle = '#34495e';
+    ctx.beginPath();
+    ctx.ellipse(0, -16, 5, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Gun
+    ctx.fillStyle = '#2c3e50';
+    // Gun body
+    ctx.fillRect(5, -5, 12, 4);
+    // Gun handle
+    ctx.fillRect(5, -2, 3, 5);
+
     ctx.restore();
+    // --- END ASTRONAUT ---
+
+    ctx.restore();
+
+    // Draw Bullets
+    bullets.forEach(b => b.draw());
+
+    // Draw Score
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Score: ${score > 0 ? score : ''}`, 20, 40);
 }
 
 function update() {
@@ -129,12 +306,8 @@ function update() {
 
     // Generate Smoke
     if (isMoving) {
-        // Create multiple particles for density
         for (let i = 0; i < 2; i++) {
-            // Adjust particle emission point based on rotation
-            // We need to emit from the "bottom" of the rocket, which changes with rotation
-            // Simple approximation: Emit from center, since we draw particles behind
-            particles.push(new Particle(rocket.x, rocket.y));
+            particles.push(new Particle(rocket.x, rocket.y, 'rgba(255, 255, 255, 1)', 1.5));
         }
     }
 
@@ -175,6 +348,36 @@ function update() {
             i--;
         }
     }
+
+    // Update Bullets
+    for (let i = 0; i < bullets.length; i++) {
+        bullets[i].update();
+        if (bullets[i].life <= 0) {
+            bullets.splice(i, 1);
+            i--;
+        }
+    }
+
+    // Update Aliens & Check Collisions
+    aliens.forEach(a => {
+        a.update();
+
+        // Bullet-Alien Collision
+        bullets.forEach((b, bIndex) => {
+            const bDist = Math.hypot(b.x - a.x, b.y - a.y);
+            if (bDist < a.size + 10) {
+                triggerAlienDeath(a);
+                bullets.splice(bIndex, 1);
+            }
+        });
+    });
+}
+
+function triggerAlienDeath(alien) {
+    createExplosion(alien.x, alien.y, 'rgba(46, 204, 113, 1)'); // Alien green explosion
+    createExplosion(alien.x, alien.y, 'rgba(155, 89, 182, 1)'); // UFO purple explosion
+    score++;
+    alien.reset();
 }
 
 function animate() {
@@ -188,6 +391,16 @@ window.addEventListener('keydown', (e) => {
     if (e.key === 'a' || e.key === 'A') keys.a = true;
     if (e.key === 's' || e.key === 'S') keys.s = true;
     if (e.key === 'd' || e.key === 'D') keys.d = true;
+    if (e.key === ' ') {
+        // Shoot!
+        bullets.push(new Bullet(rocket.x, rocket.y, rocket.angle));
+    }
+});
+
+window.addEventListener('mousedown', (e) => {
+    if (e.button === 0) { // Left click
+        bullets.push(new Bullet(rocket.x, rocket.y, rocket.angle));
+    }
 });
 
 window.addEventListener('keyup', (e) => {
