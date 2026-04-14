@@ -1,69 +1,121 @@
-# 🚀 Rocket Movement Simulation (Canvas + Antigravity Basics)
+# 🚀 Rocket Game (Space Shooter)
 
-A simple **HTML5 Canvas-based rocket simulation** where a rocket can be controlled using the keyboard (WASD).  
-The rocket smoothly rotates in the direction of movement and emits smoke particles while moving, creating a basic antigravity / space-like effect.
-
-This project is beginner-friendly and focuses on **movement, rotation, particles, and animation loops**.
+## 🎮 Overview  
+A fast-paced **2D space shooter game** built using **HTML5 Canvas and Vanilla JavaScript**. Control your rocket, eliminate aliens, and increase your score with smooth animations and dynamic effects.
 
 ---
 
-## 🎮 Features
-
-- Keyboard-controlled rocket movement (W, A, S, D)
-- Smooth rocket rotation based on direction
-- Smoke particle effect while the rocket is moving
-- Static glowing moon for visual depth
-- Full-screen responsive canvas
-- Clean animation loop using `requestAnimationFrame`
-
----
-
-## 🧠 How It Works (Simple Explanation)
-
-Think of the rocket like a character in a game:
-
-- The **canvas** is the screen
-- The **rocket object** stores position, speed, and angle
-- Every frame:
-  1. The rocket position updates based on key presses
-  2. The rocket angle smoothly rotates toward the movement direction
-  3. Smoke particles are created when the rocket moves
-  4. Old particles fade out and are removed
-  5. Everything is redrawn on the canvas
-
-🧩 *Analogy:*  
-Like driving a remote-control rocket — when you press a key, it moves, turns smoothly, and leaves smoke behind.
+## ✨ Features  
+- 🚀 Smooth rocket movement with rotation  
+- 👾 Animated UFO-style aliens  
+- 🔫 Shooting system (keyboard + mouse)  
+- 💥 Explosion particle effects  
+- 🌫️ Rocket smoke trail  
+- 🌙 Glowing moon background  
+- 📈 Real-time score tracking  
+- ⚡ Collision detection system  
 
 ---
 
-## ⌨️ Controls
+## 🎯 Controls  
 
 | Key | Action |
-|----|-------|
-| W | Move Up |
-| A | Move Left |
-| S | Move Down |
-| D | Move Right |
-
-Diagonal movement is supported (e.g., **W + D**).
-
----
-
-## 🛠️ Technologies Used
-
-- HTML5
-- CSS3
-- JavaScript
-- Canvas 2D API
-
-No external libraries are used.
+|-----|--------|
+| **W** | Move Up |
+| **A** | Move Left |
+| **S** | Move Down |
+| **D** | Move Right |
+| **SPACE** | Shoot |
+| **Left Click** | Shoot |
 
 ---
 
-## 📁 Project Structure
-/project-folder
-│
-├── index.html # Main HTML file
-├── style.css # Canvas and page styling
-└── script.js # Rocket logic, particles, and animation
+## 🛠️ Tech Stack  
+- **JavaScript (Vanilla)**  
+- **HTML5 Canvas API**  
+- No external libraries used  
 
+---
+
+## 🧩 How It Works  
+
+### 🔁 Game Loop  
+The game runs using:
+```js
+requestAnimationFrame(animate)
+```
+- `update()` → Handles movement, physics, collisions  
+- `draw()` → Renders everything on canvas  
+
+---
+
+### 🚀 Core Components  
+
+#### Rocket  
+- Controlled via WASD  
+- Smooth angle rotation  
+- Emits smoke particles while moving  
+
+#### Bullets  
+- Fired in direction of rocket  
+- Uses trigonometry (`sin`, `cos`)  
+- Limited lifetime for performance  
+
+#### Aliens  
+- Random movement with floating animation  
+- Bounce within screen  
+- Respawn after being destroyed  
+
+#### Particles  
+- Used for explosions & smoke  
+- Fade and shrink over time  
+
+---
+
+### 💥 Collision Detection  
+Uses distance-based collision:
+```js
+Math.hypot(x1 - x2, y1 - y2)
+```
+
+---
+
+## 🚀 Getting Started  
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/R00tedbyAK/Rocket---Game.git
+```
+
+### 2. Run the Game  
+Open `index.html` in your browser.
+
+---
+
+## 📁 Project Structure  
+```
+Rocket---Game/
+ ┣ index.html
+ ┣ script.js
+ ┗ README.md
+```
+
+---
+
+## 🔥 Future Improvements  
+- 🔊 Sound effects & background music  
+- ❤️ Health system  
+- 👾 Advanced enemy AI  
+- 🏆 High score saving  
+- 🌌 Better space environment  
+
+---
+
+## 👨‍💻 Author  
+**R00tedbyAK (Root)**  
+Cybersecurity Enthusiast | Developer  
+
+---
+
+## ⚡ Note  
+This project is built using **pure JavaScript without any frameworks**, showcasing core game development concepts using the Canvas API.
