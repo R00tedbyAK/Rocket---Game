@@ -14,7 +14,18 @@ let rocket = {
 };
 
 let bullets = [];
-let score = 0;
+let totalScore = 0;
+let levelScore = 0;
+let currentLevel = 1;
+const levelData = {
+    1: { time: 10, target: 5 },
+    2: { time: 15, target: 8 },
+    3: { time: 25, target: 15 }
+};
+let timeLeft = levelData[currentLevel].time;
+let gameOver = false;
+let gameCompleted = false;
+const timerDisplay = document.getElementById('timer');
 
 class Bullet {
     constructor(x, y, angle) {
@@ -283,13 +294,40 @@ function draw() {
     bullets.forEach(b => b.draw());
 
     // Draw Score
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 24px "Segoe UI", Roboto, Arial, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(`Score: ${score > 0 ? score : ''}`, 20, 40);
+    ctx.textBaseline = 'top';
+    ctx.shadowBlur = 0; // Reset any shadow from passing objects
+    ctx.fillText(`Level: ${currentLevel}`, 20, 20);
+    ctx.fillText(`Score: ${levelScore} / ${levelData[currentLevel].target}`, 20, 50);
+
+    if (gameOver) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.textAlign = 'center';
+        ctx.font = 'bold 64px Arial';
+
+        if (gameCompleted) {
+            ctx.fillStyle = '#f1c40f'; // Gold colour for win
+            ctx.fillText('MISSION COMPLETE!', canvas.width / 2, canvas.height / 2 - 20);
+        } else {
+            ctx.fillStyle = '#e74c3c'; // Red colour for game over
+            ctx.fillText('MISSION FAILED', canvas.width / 2, canvas.height / 2 - 20);
+        }
+
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 32px Arial';
+        ctx.fillText(`Final Kills: ${totalScore}`, canvas.width / 2, canvas.height / 2 + 40);
+
+        ctx.font = '24px Arial';
+        ctx.fillText('Press SPACE to Restart', canvas.width / 2, canvas.height / 2 + 90);
+    }
 }
 
 function update() {
+    if (gameOver) return;
     let isMoving = false;
 
     // Movement
@@ -376,8 +414,26 @@ function update() {
 function triggerAlienDeath(alien) {
     createExplosion(alien.x, alien.y, 'rgba(46, 204, 113, 1)'); // Alien green explosion
     createExplosion(alien.x, alien.y, 'rgba(155, 89, 182, 1)'); // UFO purple explosion
-    score++;
+    totalScore++;
+    levelScore++;
     alien.reset();
+
+    // Check level progression
+    if (levelScore >= levelData[currentLevel].target) {
+        if (currentLevel === 3) {
+            gameCompleted = true; // Beat level 3!
+            gameOver = true;
+        } else {
+            currentLevel++;
+            levelScore = 0;
+            timeLeft = levelData[currentLevel].time;
+            timerDisplay.innerText = timeLeft;
+            timerDisplay.classList.remove('warning');
+
+            // Re-spawn aliens to make it fresh
+            aliens.forEach(a => a.reset());
+        }
+    }
 }
 
 function animate() {
@@ -386,7 +442,57 @@ function animate() {
     draw();
 }
 
+// Timer Logic
+function startTimer() {
+    const countdown = setInterval(() => {
+        if (gameOver) {
+            clearInterval(countdown);
+            return;
+        }
+
+        timeLeft--;
+        timerDisplay.innerText = timeLeft;
+
+        if (timeLeft <= 3) {
+            timerDisplay.classList.add('warning');
+        } else {
+            timerDisplay.classList.remove('warning');
+        }
+
+        if (timeLeft <= 0) {
+            gameOver = true;
+            clearInterval(countdown);
+        }
+    }, 1000);
+}
+
+function restartGame() {
+    currentLevel = 1;
+    totalScore = 0;
+    levelScore = 0;
+    timeLeft = levelData[currentLevel].time;
+    gameOver = false;
+    gameCompleted = false;
+    bullets = [];
+    particles = [];
+    timerDisplay.innerText = timeLeft;
+    timerDisplay.classList.remove('warning');
+    rocket.x = canvas.width / 2;
+    rocket.y = canvas.height / 2;
+    rocket.angle = 0;
+    aliens.forEach(a => a.reset());
+
+    // Resume timer
+    startTimer();
+}
+
+startTimer();
+
 window.addEventListener('keydown', (e) => {
+    if (gameOver && e.key === ' ') {
+        restartGame();
+        return;
+    }
     if (e.key === 'w' || e.key === 'W') keys.w = true;
     if (e.key === 'a' || e.key === 'A') keys.a = true;
     if (e.key === 's' || e.key === 'S') keys.s = true;
