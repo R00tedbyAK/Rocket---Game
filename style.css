@@ -11,3 +11,45 @@ body {
 canvas {
     display: block;
 }
+
+#timer {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 10px 0;
+    width: 100px;
+    text-align: center;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    user-select: none;
+}
+
+#timer.warning {
+    color: #ff4757;
+    border-color: rgba(255, 71, 87, 0.5);
+    animation: alert-pulse 1s infinite;
+}
+
+@keyframes alert-pulse {
+    0% {
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    50% {
+        box-shadow: 0 0 20px 5px rgba(255, 71, 87, 0.6);
+    }
+
+    100% {
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+}
