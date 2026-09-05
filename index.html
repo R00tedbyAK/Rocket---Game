@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galactic Rocket Defender</title>
+    <meta name="description" content="A fast-paced JS space shooter game.">
+    <!-- Premium Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Immersive Space Parallax Backgrounds -->
+    <div class="stars base"></div>
+    <div class="stars mid"></div>
+    <div class="stars far"></div>
+
+    <!-- Game HUD: Timer -->
+    <div id="timer">10</div>
+
+    <!-- Instruction Overlay -->
+    <div id="hud">
+        <div class="hud-item">
+            <div class="key-group">
+                <span class="key">W</span>
+                <span class="key">A</span>
+                <span class="key">S</span>
+                <span class="key">D</span>
+            </div>
+            <span>Move</span>
+        </div>
+        <div class="hud-separator"></div>
+        <div class="hud-item">
+            <span class="key space-key">SPACE</span>
+            <span>Shoot</span>
+        </div>
+    </div>
+
+    <!-- Main Game Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Game Logic Scripts -->
+    <script src="script.js"></script>
+</body>
+
+</html>
